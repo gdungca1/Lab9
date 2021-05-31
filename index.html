@@ -55,18 +55,115 @@
     <button>Trigger a Global Error</button>
   </section>
 
+    <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "c12a307d738245e7a4a5ad55437146d5"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  <script>
+    class BigInputError extends SyntaxError {
+      constructor(message) {
+        super(message);
+        this.name = "BigInputError";
+      }
+    }
+
+    function checkBigInput(x, y) {
+      if (x > 10) {
+        throw new BigInputError("Too big first number!");
+      }
+      if (y > 10) {
+        throw new BigInputError("Too big second number");
+      }
+    }
+
+
     let calculateBtn = document.querySelector('#calculate');
     calculateBtn.addEventListener('click', () => {
       let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
+      let firstNum = parseInt(document.querySelector('#first-num').value);
+      let secondNum = parseInt(document.querySelector('#second-num').value);
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        console.log(firstNum);
+        console.log(secondNum);
+        checkSmallInput(firstNum, secondNum, operator);
+      }
+      catch (err) {
+        if (err instanceof BigInputError) {
+          console.log(err.message);
+          alert("Expression too easy. Don't use the calculator next time.");
+        }
+      }
+      finally {
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+        console.info("Successful-ish test!");
+      }
+      console.log(secondNum === 0);
+      console.log(operator === '/');
+
+      if (secondNum === 0 && operator === '/') {
+        console.log("uh oh.");
+        throw Error("Divide by zero");
+      }
     });
 
+    window.onerror = (msg, url, lineNo, columnNo, error) => {
+      console.log("Got \'em boys", msg);
+    }
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
     // TODO - Make buttons functional
+    errorBtns[0].addEventListener('click', () => {
+      console.log("Hello World!");
+    });
+    errorBtns[1].addEventListener('click', () => {
+      console.error("Encountered Bruh Moment");
+    });
+    errorBtns[2].addEventListener('click', () => {
+      console.dir(document.head);
+    });
+    errorBtns[3].addEventListener('click', () => {
+      console.dirxml(document);
+    });
+    let i = 1;
+    const group = "Group ";
+    errorBtns[4].addEventListener('click', () => {
+      console.group(group + i);
+      console.info("Beginning of group!");
+    });
+    errorBtns[5].addEventListener('click', () => {
+      console.info("End of group!");
+      console.groupEnd();
+      i += 1;
+    });
+    errorBtns[6].addEventListener('click', () => {
+      let d = new Date();
+      console.table([
+        {
+          "Month": d.getMonth() + 1,
+          "Day": d.getDate(),
+        }
+      ])
+    });
+    errorBtns[7].addEventListener('click', () => {
+      console.log("Started Timer!");
+      console.time();
+    });
+    errorBtns[8].addEventListener('click', () => {
+      console.log("Ending timer!");
+      console.timeEnd();
+    });
+    errorBtns[9].addEventListener('click', () => {
+      const beginning = () => { middle(); };
+      const middle = () => { end(); };
+      const end = () => { console.trace(); };
+      beginning();
+    });
+    errorBtns[10].addEventListener('click', () => {
+      console.log(nonexistent);
+    });
   </script>
 </body>
 </html>
